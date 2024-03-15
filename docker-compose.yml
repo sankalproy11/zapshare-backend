@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  app:
+    container_name: zapshare_backend
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - uploads:/usr/src/app/uploads
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+      - redis
+
+  mongo:
+    container_name: mongodb
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb-data:/data/db
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  mongodb-data:
+  redis-data:
+  uploads:
