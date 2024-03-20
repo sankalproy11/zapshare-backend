@@ -1,6 +1,6 @@
-const multer = require("../middlewares/multer");
 const FileTransfer = require("../models/File");
 const uploadQueue = require("../utils/uploadQueue");
+const deleteFileQueue = require("../utils/deleteFileQueue");
 
 const generateOtp = () => {
   return Math.random().toString().slice(-6);
@@ -56,6 +56,18 @@ const uploadFile = async (req, res, next) => {
           error: error.message,
         });
       });
+
+    // Schedule deletion of the file from S3 after 5 minutes
+    await deleteFileQueue.add(
+      {
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: newFile.s3Key,
+        uploadID: req.uploadID,
+      },
+      {
+        delay: 1 * 60 * 1000, // 5 minutes
+      }
+    );
   } catch (saveError) {
     res.status(500).json({
       message: "Error saving file information",
