@@ -35,16 +35,27 @@ const uploadFile = async (req, res, next) => {
 
   try {
     await newFile.save();
-    uploadQueue.add({
+    const job = await uploadQueue.add({
       directoryPath: `./uploads/${req.uploadID}`,
       bucketName: process.env.AWS_S3_BUCKET_NAME,
       uploadID: req.uploadID,
     });
 
-    res.json({
-      message: "File uploaded successfully, processing for S3.",
-      otp: otp,
-    });
+    // Listen for job completion to send the response
+    job
+      .finished()
+      .then(() => {
+        res.json({
+          message: "File uploaded successfully to S3.",
+          otp: otp,
+        });
+      })
+      .catch((error) => {
+        res.status(500).json({
+          message: "Error during file upload",
+          error: error.message,
+        });
+      });
   } catch (saveError) {
     res.status(500).json({
       message: "Error saving file information",
