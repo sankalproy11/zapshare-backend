@@ -1,23 +1,22 @@
-const Queue = require("bull");
-const { uploadToS3 } = require("./s3Uploader");
+// uploadQueue.js
+const Bull = require("bull");
+const uploadProcess = require("./s3Uploader"); // The function to upload files to S3
 
-// Create a Bull queue for file uploads
-const uploadQueue = new Queue("upload-queue", {
+const uploadQueue = new Bull("uploadQueue", {
   redis: {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
   },
 });
 
+// Process jobs in the queue
 uploadQueue.process(async (job, done) => {
   try {
-    const { file, s3Key } = job.data;
-    await uploadToS3(file, s3Key);
-    done();
+    const result = await uploadProcess(job.data);
+    done(null, result);
   } catch (error) {
-    console.error("Failed to upload file to S3:", error);
     done(error);
   }
 });
 
-module.exports = { uploadQueue };
+module.exports = uploadQueue;
