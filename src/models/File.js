@@ -34,12 +34,13 @@ const fileSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       default: () => new Date(+new Date() + 5 * 60 * 1000), // 5 minutes from now
-      index: { expires: "5m" }, // Automatically delete the document after 5 minutes if not downloaded
     },
   },
   {
     timestamps: true,
   }
 );
+
+fileSchema.index({ otp: 1, isDownloaded: 1, expiresAt: 1 });
 
 module.exports = mongoose.model("File", fileSchema);
