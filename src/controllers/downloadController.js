@@ -5,7 +5,11 @@ const downloadFile = async (req, res) => {
   try {
     const { otp } = req.body;
 
-    const file = await File.findOne({ otp: otp, isDownloaded: false });
+    const file = await File.findOne({
+      otp: otp,
+      isDownloaded: false,
+      expiresAt: { $gt: new Date() },
+    });
     if (!file) {
       return res
         .status(404)
