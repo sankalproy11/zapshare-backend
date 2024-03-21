@@ -1,18 +1,17 @@
 require("dotenv").config();
-const http = require("http");
 const connectDB = require("./config/mongo");
 const app = require("./app");
-const setupWebSocket = require("./sockets/websocket");
+const serverless = require("serverless-http");
 
 connectDB()
-  .then(() => {
-    const server = http.createServer(app);
-    setupWebSocket(server);
+  // .then(() => {
 
-    server.listen(process.env.PORT || 8000, () => {
-      console.log(`⚙️ Server is running at port : ${process.env.PORT || 8000}`);
-    });
-  })
+  //   server.listen(process.env.PORT || 8000, () => {
+  //     console.log(`⚙️ Server is running at port : ${process.env.PORT || 8000}`);
+  //   });
+  // })
   .catch((err) => {
     console.log("MONGO db connection failed !!! ", err);
   });
+
+module.exports.handler = serverless(app);

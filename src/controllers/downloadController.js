@@ -18,10 +18,7 @@ const downloadFile = async (req, res) => {
 
     await File.updateOne({ _id: file._id }, { $set: { isDownloaded: true } });
 
-    const url = await generatePresignedUrl(
-      process.env.AWS_S3_BUCKET_NAME,
-      file.s3Key
-    );
+    const url = await generatePresignedUrl(process.env.BUCKET_NAME, file.s3Key);
 
     res.json({ url });
   } catch (error) {

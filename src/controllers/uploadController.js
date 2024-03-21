@@ -37,7 +37,7 @@ const uploadFile = async (req, res, next) => {
     await newFile.save();
     const job = await uploadQueue.add({
       directoryPath: `./uploads/${req.uploadID}`,
-      bucketName: process.env.AWS_S3_BUCKET_NAME,
+      bucketName: process.env.BUCKET_NAME,
       uploadID: req.uploadID,
     });
 
@@ -60,12 +60,12 @@ const uploadFile = async (req, res, next) => {
     // Schedule deletion of the file from S3 after 5 minutes
     await deleteFileQueue.add(
       {
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Bucket: process.env.BUCKET_NAME,
         Key: newFile.s3Key,
         uploadID: req.uploadID,
       },
       {
-        delay: 1 * 60 * 1000, // 5 minutes
+        delay: 5 * 60 * 1000,
       }
     );
   } catch (saveError) {
